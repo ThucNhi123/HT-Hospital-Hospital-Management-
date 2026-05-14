@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HT Hospital - Patient Dashboard</title>
+  {% load static %}
+  
+  <link rel="stylesheet" href="{% static 'api/css/patient_dashboard.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <header class="dashboard-header">
+    <a href="{% url 'home' %}" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+      <div class="logo-area">
+        <span class="logo-icon">H</span>
+        <span class="logo-text">HT Hospital</span>
+      </div>
+    </a>
+    <div class="user-info" onclick="openProfileModal()" style="cursor: pointer;" title="View and update personal information">
+      <i class="fa-regular fa-bell"></i>
+      <span class="user-status">
+        <strong>{{ user.username }}</strong> <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; margin-left: 6px;"></i>
+      </span>
+    </div>
+  </header>
+  <div class="main-container">
+    <aside class="sidebar" style="position: sticky; top: 70px; height: calc(100vh - 70px); overflow-y: auto;">
+      <ul class="nav-list">
+        <li class="nav-item active">
+          <a href="#">
+            <i class="fa-solid fa-house"></i> Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0);" onclick="toggleAppointments()">
+            <i class="fa-regular fa-calendar-check"></i> My Appointments
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0);" onclick="toggleMedicalHistory()">
+            <i class="fa-solid fa-file-medical"></i> Medical Records
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:void(0);" onclick="toggleInvoices()">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Your Invoices
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content">
+      
+      {% if messages %}
+        <div style="margin-bottom: 20px; padding: 15px; border-radius: 8px; background-color: #d1fae5; color: #065f46;">
+          {% for message in messages %}
+            <p style="margin: 0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="welcome-section">
+        <h1>Welcome to HT Hospital</h1>
+        <p>Welcome to HT Hospital. We are here to take care of your health.</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="overview-section">
+          <h2>My Health Overview</h2>
+          <div class="overview-cards">
+            
+            <div class="card" onclick="toggleAppointments()" style="cursor: pointer;" title="Click to view appointment details">
+              <div class="card-top">
+                <i class="fa-regular fa-calendar" style="color: #4b6bfb;"></i>
+              </div>
+              <h3>Next Appointment</h3>
+              <p>View current & upcoming appointments</p>
+              <span class="badge green">Next treatment</span>
+            </div>
+            
+            <div class="card" onclick="toggleMedicalHistory()" style="cursor: pointer;" title="Click to view medical history">
+              <div class="card-top">
+                <i class="fa-regular fa-file-lines" style="color: #059669;"></i>
+              </div>
+              <h3>Recent Records</h3>
+              <p>View all health records and visit history</p>
+            </div>
+            
+            <div class="card" onclick="toggleDoctorsList()" style="cursor: pointer;" title="Click to view doctors list">
+              <div class="card-top">
+                <i class="fa-solid fa-user-doctor" style="color: #10b981;"></i>
+              </div>
+              <h3>Doctors List</h3>
+              <p>View doctor information and specialty areas</p>
+            </div>
+
+          </div>
+          
+          <div class="login-footer">
+            Logged in guest
+          </div>
+        </div>
+
+        <div class="quick-actions-section">
+          <h2>Quick Actions</h2>
+          <div class="action-buttons">
+            <button class="btn btn-blue" onclick="openBookingModal()">Book New Appointment</button>
+            <button class="btn btn-teal" onclick="toggleMedicalHistory()">View Medical History</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="appointments-section" style="display: none; background: white; padding: 25px; border-radius: 12px; margin-top: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(229, 231, 235, 1);">
+        <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+          <i class="fa-solid fa-calendar-check" style="margin-right: 8px;"></i> My Appointments
+        </h3>
+
+        {% if appointments %}
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+              <thead>
+                <tr style="background-color: #f1f5f9; color: #334155;">
+                  <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Date</th>
+                  <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Time</th>
+                  <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Doctor</th>
+                  <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Specialty</th>
+                  <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in appointments %}
+                  <tr id="appointment-row-{{ item.AppointmentID }}">
+                    <td style="padding: 14px 12px; color: #475569;">{{ item.appointment_date }}</td>
+                    <td style="padding: 14px 12px; color: #475569;">{{ item.appointment_time }}</td>
+                    <td style="padding: 14px 12px; color: #0f172a; font-weight: 600;">{{ item.doctor_name }}</td>
+                    <td style="padding: 14px 12px; color: #475569;">{{ item.specialization }}</td>
+                    <td style="padding: 14px 12px;">
+                      <button onclick="deleteAppointment('{{ item.appointment_id }}')" 
+                              style="background-color: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer;" 
+                              title="Delete Appointment">
+                        <i class="fa-solid fa-trash-can"></i> Delete
+                      </button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="color: #64748b; text-align: center; padding: 30px 0; font-size: 0.95rem;">
+            <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; display: block; margin-bottom: 12px; color: #94a3b8;"></i>
+            You do not have any current or future appointments.
+          </p>
+        {% endif %}
+      </div>
+
+      <div id="medical-history-section" style="display: none; background: white; padding: 25px; border-radius: 12px; margin-top: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(229, 231, 235, 1);">
+        <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+          <i class="fa-solid fa-file-medical" style="margin-right: 8px;"></i> Medical History
+        </h3>
+        
+        {% if medical_history %}
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+              <thead>
+                <tr style="background-color: #f1f5f9; color: #334155;">
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Date</th>
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Doctor</th>
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Reason</th>
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Status</th>
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Treatment</th>
+                  <th style="padding: 14px 8px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in medical_history %}
+                  <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 14px 8px; color: #475569; white-space: nowrap;">{{ item.appointment_date }}</td>
+                    <td style="padding: 14px 8px; color: #0f172a; font-weight: 600;">{{ item.doctor_name }}</td>
+                    <td style="padding: 14px 8px; color: #475569;">{{ item.reason_for_visit|default:"-" }}</td>
+                    <td style="padding: 14px 8px; vertical-align: middle; text-align: left;">
+                        <div style="display: flex; justify-content: flex-start; align-items: center;">
+                            {% if item.display_status %}
+                                {% if item.display_status == 'Scheduled' %}
+                                    <span style="display: inline-flex; align-items: center; background-color: #E0F2FE; color: #0369A1; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; border: 1px solid #7DD3FC; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
+                                        <i class="fa-regular fa-clock" style="margin-right: 6px;"></i> {{ item.display_status }}
+                                    </span>
+                                {% elif item.display_status == 'Cancelled' %}
+                                    <span style="display: inline-flex; align-items: center; background-color: #FEE2E2; color: #B91C1C; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; border: 1px solid #FECACA; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
+                                        <i class="fa-solid fa-xmark" style="margin-right: 6px;"></i> {{ item.display_status }}
+                                    </span>
+                                {% elif item.display_status == 'No-show' %}
+                                    <span style="display: inline-flex; align-items: center; background-color: #FFEDD5; color: #C2410C; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; border: 1px solid #FED7AA; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
+                                        <i class="fa-solid fa-user-slash" style="margin-right: 6px;"></i> {{ item.display_status }}
+                                    </span>
+                                {% else %} 
+                                    <span style="display: inline-flex; align-items: center; background-color: #DCFCE7; color: #15803D; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 0.75rem; border: 1px solid #BBF7D0; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">
+                                        <i class="fa-solid fa-check" style="margin-right: 6px;"></i> {{ item.display_status }}
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <span style="color: #94a3b8; font-style: italic; padding-left: 4px;">No data</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: 14px 8px; color: #475569;">{{ item.treatment_type|default:"N/A" }}</td>
+                    <td style="padding: 14px 8px; color: #64748b; font-size: 0.85rem;">{{ item.treatment_description|default:"No details available" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="color: #64748b; text-align: center; padding: 30px 0; font-size: 0.95rem;">
+            <i class="fa-solid fa-folder-open" style="font-size: 1.8rem; display: block; margin-bottom: 12px; color: #94a3b8;"></i>
+            You do not have any past medical records on the system.
+          </p>
+        {% endif %}
+      </div>
+
+      <div id="doctors-section" style="display: none; background: white; padding: 25px; border-radius: 12px; margin-top: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(229, 231, 235, 1);">
+          <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+              <i class="fa-solid fa-user-doctor" style="margin-right: 8px;"></i> Doctors List
+          </h3>
+
+          <div style="display: flex; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="flex: 1;">
+                  <label style="display:block; font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 5px;">Specialty</label>
+                  <select id="filter-specialty" onchange="filterDoctors()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: white;">
+                      <option value="">All Specialties</option>
+                      <option value="Oncology">Oncology</option>
+                      <option value="Dermatology">Dermatology</option>
+                      <option value="Pediatrics">Pediatrics</option>
+                  </select>
+              </div>
+
+              <div style="flex: 1;">
+                  <label style="display:block; font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 5px;">Experience</label>
+                  <select id="filter-experience" onchange="filterDoctors()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: white;">
+                      <option value="">Any Experience</option>
+                      <option value="0-5">0 - 5 years</option>
+                      <option value="6-10">6 - 10 years</option>
+                      <option value="10+">Over 10 years</option>
+                  </select>
+              </div>
+
+              <div style="flex: 1;">
+                  <label style="display:block; font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 5px;">Branch</label>
+                  <select id="filter-branch" onchange="filterDoctors()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; background: white;">
+                      <option value="">All Branches</option>
+                      <option value="Central Hospital">Central Hospital</option>
+                      <option value="Westside Clinic">Westside Clinic</option>
+                      <option value="Eastside Clinic">Eastside Clinic</option>
+                  </select>
+              </div>
+          </div>
+
+          {% if doctors_list %}
+          <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                  <thead>
+                      <tr style="background-color: #f1f5f9; color: #334155;">
+                          <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Full Name</th>
+                          <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Specialty</th>
+                          <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Experience</th>
+                          <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Branch</th>
+                          <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1; font-weight: 700;">Email</th>
+                      </tr>
+                  </thead>
+                  <tbody id="doctors-table-body">
+                      {% for doc in doctors_list %}
+                      <tr class="doctor-row" 
+                          data-specialty="{{ doc.specialization }}" 
+                          data-experience="{{ doc.years_experience }}" 
+                          data-branch="{{ doc.hospital_branch }}"
+                          style="border-bottom: 1px solid #e2e8f0;">
+                          <td style="padding: 14px 12px; color: #0f172a; font-weight: 600;">{{ doc.doctor_name }}</td>
+                          <td style="padding: 14px 12px; color: #475569;">{{ doc.specialization }}</td>
+                          <td style="padding: 14px 12px; color: #475569;">{{ doc.years_experience }} years</td>
+                          <td style="padding: 14px 12px; color: #475569;">{{ doc.hospital_branch }}</td>
+                          <td style="padding: 14px 12px; color: #2563eb;">{{ doc.email }}</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+          {% else %}
+          <p style="color: #64748b; text-align: center; padding: 30px 0;">No doctor information available.</p>
+          {% endif %}
+      </div>
+
+      <div id="invoices-section" style="display: none; background: white; padding: 25px; border-radius: 12px; margin-top: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(229, 231, 235, 1);">
+        <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+          <i class="fa-solid fa-file-invoice-dollar" style="margin-right: 8px;"></i> Your Invoices
+        </h3>
+
+        <div style="margin-bottom: 25px; background-color: #eff6ff; padding: 15px; border-radius: 8px; border: 1px solid #bfdbfe; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 600; color: #1e3a8a;">Total Amount Paid:</span>
+          <span style="font-weight: bold; color: #2563eb; font-size: 1.2rem;">
+            {{ total_amount }} USD
+          </span>
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+            <thead>
+              <tr style="background-color: #f8fafc; color: #475569;">
+                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Date</th>
+                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Amount</th>
+                <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Method</th> <th style="padding: 12px; border-bottom: 2px solid #e2e8f0;">Status</th> 
+              </tr>
+            </thead>
+            <tbody>
+              {% for inv in invoices %}
+              <tr id="invoice-row-{{ inv.bill_id }}" style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 12px;">{{ inv.bill_date }}</td>
+                <td style="padding: 12px; font-weight: 600; color: #0f172a;">{{ inv.formatted_amount }} USD</td>
+                <td style="padding: 12px; color: #475569;">{{ inv.payment_method|default:"Credit Card" }}</td>
+                <td style="padding: 12px;">
+                  <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; 
+                    background-color: {% if inv.payment_status == 'Paid' %}#dcfce7{% else %}#fee2e2{% endif %}; 
+                    color: {% if inv.payment_status == 'Paid' %}#166534{% else %}#991b1b{% endif %};">
+                    {{ inv.payment_status|default:"Paid" }}
+                  </span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" style="padding: 30px; text-align: center; color: #94a3b8;">
+                  No invoice data available.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="booking-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: #fefefe; margin: 5% auto; padding: 30px; border-radius: 12px; width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <span onclick="closeBookingModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+      
+      <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+        <i class="fa-regular fa-calendar-check" style="margin-right: 8px;"></i> Book Appointment
+      </h3>
+
+      <form method="POST" action="{% url 'patient_dashboard' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_appointment">
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Symptom / Reason for visit:</label>
+          <input type="text" name="reason" required placeholder="Enter symptom (e.g., headache, cough...)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Select Specialty:</label>
+          <select id="specialty" name="specialty" onchange="updateDoctors()" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background: white;">
+            <option value="">-- Select Specialty --</option>
+            <option value="Oncology">Oncology</option>
+            <option value="Dermatology">Dermatology</option>
+            <option value="Pediatrics">Pediatrics</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Suggest / Select Doctor:</label>
+          <select id="doctor_id" name="doctor_id" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background: white;">
+            <option value="">-- Select Doctor --</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Appointment Date:</label>
+          <input type="date" name="appt_date" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #475569;">
+            Select Appointment Time:
+          </label>
+          
+          <div id="time-slots-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            </div>
+          
+          <input type="hidden" name="appt_time" onchange="updateAvailableSlots()" id="selected-time" required>
+        </div>
+
+        <button type="submit" style="width: 100%; background-color: #3b82f6; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          Confirm Booking
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="profile-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: #fefefe; margin: 5% auto; padding: 30px; border-radius: 12px; width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <span onclick="closeProfileModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+      
+      <h3 style="color: #195190; margin-bottom: 20px; font-size: 1.3rem;">
+        <i class="fa-regular fa-user" style="margin-right: 8px;"></i> Personal Information
+      </h3>
+
+      <form action="{% url 'update_profile' %}" method="POST">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Patient ID:</label>
+          <input type="text" name="patient_id" value="{{ patient_id }}" readonly style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Full Name:</label>
+          <input type="text" name="full_name" value="{{ patient.first_name }} {{ patient.last_name }}" required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Date of Birth:</label>
+          <input type="date" name="date_of_birth" value="{{ patient.date_of_birth|date:'Y-m-d' }}" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Phone Number:</label>
+          <input type="tel" name="contact_number" value="{{ patient.contact_number|default:'' }}" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Email:</label>
+          <input type="tel" name="email" value="{{ patient.email|default:'' }}" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Gender:</label>
+          <select name="gender" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: white;">
+            <option value="" {% if not patient.gender %}selected{% endif %} disabled>Select Gender</option>
+            <option value="Male" {% if patient.gender == 'Male' or patient.gender == 'M' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if patient.gender == 'Female' or patient.gender == 'F' %}selected{% endif %}>Female</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Insurance Number:</label>
+          <input type="tel" name="insurance_number" value="{{ patient.insurance_number|default:'' }}" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">Address:</label>
+          <textarea name="address" rows="2" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">{{ patient.address|default:'' }}</textarea>
+        </div>
+
+        <button type="submit" style="width: 100%; background-color: #2563eb; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
+          Update
+        </button>
+      </form>
+    </div>
+  </div>
+  <script>
+    // Hiển thị/Ẩn phần Medical History
+    function toggleMedicalHistory() {
+      var section = document.getElementById("medical-history-section");
+      if (section.style.display === "none") {
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        section.style.display = "none";
+      }
+    }
+
+    // Hiển thị/Ẩn phần My Appointments
+    function toggleAppointments() {
+      var section = document.getElementById("appointments-section");
+      if (section.style.display === "none") {
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        section.style.display = "none";
+      }
+    }
+
+    // Hiển thị/Ẩn phần Doctors List
+    function toggleDoctorsList() {
+      var section = document.getElementById("doctors-section");
+      if (section.style.display === "none") {
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        section.style.display = "none";
+      }
+    }
+
+    // Hiển thị/Ẩn phần Your Invoices
+    function toggleInvoices() {
+      var section = document.getElementById("invoices-section");
+      if (section.style.display === "none") {
+        section.style.display = "block";
+        section.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        section.style.display = "none";
+      }
+    }
+
+    // Đóng/Mở Modal Booking
+    function openBookingModal() {
+      document.getElementById("booking-modal").style.display = "block";
+    }
+
+    function closeBookingModal() {
+      document.getElementById("booking-modal").style.display = "none";
+    }
+
+    const doctorsList = [
+      {% for doc in doctors_list %}
+        { id: "{{ doc.doctor_id }}", name: "{{ doc.doctor_name }}", specialty: "{{ doc.specialization }}" },
+      {% endfor %}
+    ];
+
+    const specialtyMapping = {
+      "Oncology": ["Oncology"],
+      "Dermatology": ["Dermatology"],
+      "Pediatrics": ["Pediatrics"]
+    };
+
+    // Cập nhật select Bác sĩ theo chuyên khoa
+    function updateDoctors() {
+      const selectedSpecialty = document.getElementById("specialty").value;
+      const doctorSelect = document.getElementById("doctor_id");
+      
+      doctorSelect.innerHTML = '<option value="">-- Select Doctor --</option>';
+      
+      doctorsList.forEach(doc => {
+        let isValid = false;
+        if (!selectedSpecialty) {
+          isValid = true;
+        } else {
+          const allowedValues = specialtyMapping[selectedSpecialty] || [selectedSpecialty];
+          isValid = allowedValues.some(val => doc.specialty.toLowerCase() === val.toLowerCase());
+        }
+        
+        if (isValid) {
+          const opt = document.createElement("option");
+          opt.value = doc.id;
+          opt.textContent = `${doc.name} - ${doc.specialty}`;
+          doctorSelect.appendChild(opt);
+        }
+      });
+    }
+
+    updateDoctors();
+
+    // Đóng/Mở Modal Profile cá nhân
+    function openProfileModal() {
+      document.getElementById("profile-modal").style.display = "block";
+    }
+
+    function closeProfileModal() {
+      document.getElementById("profile-modal").style.display = "none";
+    }
+
+    // Giữ nguyên trạng thái hiển thị của phần hóa đơn sau khi tải lại
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.location.hash === "#invoices-section") {
+        var section = document.getElementById("invoices-section");
+        if (section) {
+          section.style.display = "block";
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
+
+    // Xoá lịch hẹn 
+    function deleteAppointment(id) {
+        if (confirm('Are you sure you want to cancel this appointment?')) {
+            fetch(`/delete-appointment/${id}/`, { // Đảm bảo có dấu gạch chéo cuối cùng
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Load lại trang để lịch tự động nhảy xuống bảng Recent Records
+                    location.reload(); 
+                } else {
+                    alert('Error canceling appointment.');
+                }
+            });
+        }
+    }
+
+    // Lọc Bác sĩ 
+    function filterDoctors() {
+        // Lấy giá trị từ các ô Select
+        const specValue = document.getElementById("filter-specialty").value.toLowerCase().trim();
+        const expValue = document.getElementById("filter-experience").value;
+        const branchValue = document.getElementById("filter-branch").value.toLowerCase().trim();
+        
+        const rows = document.querySelectorAll(".doctor-row");
+
+        rows.forEach(row => {
+            // Lấy dữ liệu ẩn từ mỗi dòng
+            const rowSpec = (row.getAttribute("data-specialty") || "").toLowerCase().trim();
+            const rowExp = parseInt(row.getAttribute("data-experience") || "0");
+            const rowBranch = (row.getAttribute("data-branch") || "").toLowerCase().trim();
+
+            // 1. Kiểm tra Chuyên khoa (Specialty)
+            let matchSpec = (specValue === "" || rowSpec === specValue);
+            
+            // 2. Kiểm tra Chi nhánh (Branch)
+            let matchBranch = (branchValue === "" || rowBranch === branchValue);
+            
+            // 3. Kiểm tra Kinh nghiệm (Experience)
+            let matchExp = true;
+            if (expValue === "0-5") matchExp = (rowExp >= 0 && rowExp <= 5);
+            else if (expValue === "6-10") matchExp = (rowExp > 5 && rowExp <= 10);
+            else if (expValue === "10+") matchExp = (rowExp > 10); // Thêm khoảng này
+
+            // Hiển thị dòng nếu thỏa mãn TẤT CẢ điều kiện
+            if (matchSpec && matchExp && matchBranch) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    // Danh sách các khung giờ cố định
+    const fixedTimeSlots = ["08:00", "09:00", "10:00", "13:00", "14:00", "15:00"];
+
+    function updateAvailableSlots() {
+        const doctorId = document.getElementById("doctor_id").value;
+        const date = document.getElementsByName("appt_date")[0].value;
+        const container = document.getElementById("time-slots-container");
+        const selectedTimeInput = document.getElementById("selected-time");
+
+        // Xóa trắng dữ liệu cũ
+        container.innerHTML = "";
+        selectedTimeInput.value = "";
+
+        if (!doctorId || !date) return;
+
+        // Gửi yêu cầu kiểm tra lịch bận tới server
+        fetch(`/check-availability/?doctor_id=${doctorId}&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                const bookedSlots = data.booked_slots; // Ví dụ: ["09:00", "14:00"]
+
+                fixedTimeSlots.forEach(slot => {
+                    const isBooked = bookedSlots.includes(slot);
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.innerText = slot;
+                    
+                    // CSS cơ bản cho các ô giờ
+                    btn.style.padding = "10px";
+                    btn.style.border = "none";
+                    btn.style.borderRadius = "6px";
+                    btn.style.fontWeight = "bold";
+                    btn.style.cursor = isBooked ? "not-allowed" : "pointer";
+                    
+                    // Tô màu: Xanh (Trống), Đỏ (Bận)
+                    btn.style.backgroundColor = isBooked ? "#fee2e2" : "#dcfce7";
+                    btn.style.color = isBooked ? "#991b1b" : "#166534";
+                    
+                    if (isBooked) {
+                        btn.disabled = true;
+                    } else {
+                        btn.onclick = function() {
+                            // Reset màu các nút khác
+                            document.querySelectorAll("#time-slots-container button").forEach(b => {
+                                if (!b.disabled) b.style.outline = "none";
+                            });
+                            // Highlight nút đang chọn
+                            this.style.outline = "3px solid #2563eb";
+                            selectedTimeInput.value = slot;
+                        };
+                    }
+                    container.appendChild(btn);
+                });
+            });
+    }
+
+  // Lắng nghe sự kiện thay đổi ngày hoặc bác sĩ
+  document.getElementById("doctor_id").addEventListener("change", updateAvailableSlots);
+  document.getElementsByName("appt_date")[0].addEventListener("change", updateAvailableSlots);
+  </script>
+</body>
+</html>

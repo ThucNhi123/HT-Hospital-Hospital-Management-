@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HT Hospital - Đăng nhập</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'api/css/sign_in.css' %}">
+</head>
+<body>
+  <header>
+    <div class="logo">HT HOSPITAL</div>
+    <div class="nav-right">
+      <a href="{% url 'sign_in' %}" class="sign-in">Sign in</a>
+      <a href="{% url 'sign_up' %}" class="sign-up">Sign up</a>
+    </div>
+  </header>
+
+  <div class="hero-wrapper">
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Sign In</h1>
+        <form method="post" style="margin-top: 20px;">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" style="padding: 10px 20px; background-color: #2d69c5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">
+            Đăng nhập
+          </button>
+        </form>
+        <p style="margin-top: 20px;">Chưa có tài khoản? <a href="{% url 'sign_up' %}" style="color: #2d69c5; text-decoration: none; font-weight: 600;">Đăng ký ngay</a></p>
+      </div>
+      <div class="hero-image">
+        <img src="{% static 'images/landing_page.png' %}" alt="Hospital Building">
+      </div>
+    </section>
+  </div>
+</body>
+</html>

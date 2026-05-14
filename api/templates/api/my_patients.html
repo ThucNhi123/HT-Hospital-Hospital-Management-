@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Patients - HT Hospital</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0;">
+
+    <div style="display: flex; min-height: 100vh;">
+        
+        <div style="width: 260px; background-color: #195190; color: white; padding: 24px 20px;">
+            <h2 style="font-size: 1.4rem; margin-bottom: 30px; font-weight: 600;">HT Hospital</h2>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 16px;">
+                    <a href="{% url 'doctor_dashboard' %}" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; transition: all 0.2s;">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li style="margin-bottom: 16px;">
+                    <a href="{% url 'my_patients' %}" style="color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.1); font-weight: 600;">
+                        <i class="fa-solid fa-user-injured"></i> My Patients
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex-grow: 1; padding: 40px;">
+            <div style="max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2 style="color: #195190; font-size: 1.5rem; margin: 0;">Patient Directory</h2>
+                    <div style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+                        <input type="text" id="searchInput" onkeyup="searchPatient()" placeholder="Search by name or ID..." style="padding: 8px 12px 8px 36px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; width: 220px;">
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                        <thead>
+                            <tr style="background-color: #f1f5f9; color: #334155;">
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">Patient ID</th>
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">Patient Name</th>
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">DOB</th>
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">Gender</th>
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">Address</th>
+                                <th style="padding: 14px 16px; border-bottom: 2px solid #cbd5e1;">Phone Number</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in patients %}
+                                <tr class="patient-row" style="border-bottom: 1px solid #e2e8f0;">
+                                    <td style="padding: 14px 16px; color: #0f172a; font-weight: 500;">
+                                        <a href="{% url 'patient_detail' p.patient_id %}" style="color: #195190; text-decoration: none;">
+                                            {{ p.patient_id }}
+                                        </a>
+                                    </td>
+                                    <td class="patient-name" style="padding: 14px 16px; color: #334155;">{{ p.full_name }}</td>
+                                    <td style="padding: 14px 16px; color: #475569;">{{ p.date_of_birth|date:"Y-m-d" }}</td>
+                                    <td style="padding: 14px 16px; color: #475569;">{{ p.gender_display }}</td>
+                                    <td style="padding: 14px 16px; color: #475569;">{{ p.address }}</td>
+                                    <td style="padding: 14px 16px; color: #475569;">{{ p.contact_number }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" style="padding: 40px; text-align: center; color: #64748b;">
+                                        No patients found.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function searchPatient() {
+        var input, filter, table, tr, tdName, tdId, i;
+        input = document.getElementById("searchInput");
+        filter = input.value.toLowerCase();
+        table = document.querySelector("table");
+        tr = table.getElementsByTagName("tr");
+
+        // Bắt đầu từ i = 1 để bỏ qua hàng tiêu đề (thead)
+        for (i = 1; i < tr.length; i++) {
+            tdId = tr[i].getElementsByTagName("td")[0];
+            tdName = tr[i].getElementsByTagName("td")[1];
+            
+            if (tdId || tdName) {
+                var idValue = tdId.textContent || tdId.innerText;
+                var nameValue = tdName.textContent || tdName.innerText;
+
+                if (idValue.toLowerCase().indexOf(filter) > -1 || nameValue.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+    </script>
+
+</body>
+</html>

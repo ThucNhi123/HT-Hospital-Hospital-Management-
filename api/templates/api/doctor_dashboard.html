@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HT Hospital - Doctor Dashboard</title>
+  {% load static %}
+  
+  <link rel="stylesheet" href="{% static 'api/css/doctor_dashboard.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background-color: #f3f4f6; font-family: 'Nunito', sans-serif;">
+
+  <header class="dashboard-header" style="background-color: #1e3a8a; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;">
+    <a href="/" style="color: white; text-decoration: none;">
+      <div class="logo-area" style="display: flex; align-items: center; gap: 12px;">
+        <span class="logo-icon" style="background-color: #2563eb; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">H</span>
+        <span class="logo-text" style="font-size: 1.25rem; font-weight: 700;">HT Hospital</span>
+      </div>
+    </a>
+    
+    <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+      <div class="welcome-doctor" style="display: flex; align-items: center; gap: 12px;">
+        <span class="welcome-text" style="font-weight: 600;">Welcome, Dr. {{ doctor.first_name }} {{ doctor.last_name }}</span>
+      </div>
+      <a href="{% url 'sign_in' %}" style="color: #f87171; text-decoration: none; font-weight: 600;" title="Log out">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    </div>
+  </header>
+
+  <div class="main-container" style="display: flex; min-height: 90vh;">
+    <aside class="sidebar" style="width: 260px; background-color: #ffffff; padding: 20px; box-shadow: 2px 0 8px rgba(0,0,0,0.03);">
+      <a href="{% url 'home' %}" style="color: #1e3a8a; text-decoration: none;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 30px; font-weight: 600;">HT Hospital</h2>
+      </a>
+      
+      <ul class="nav-list" style="list-style: none; padding: 0;">
+        <li class="nav-item active" style="margin-bottom: 15px;">
+          <a href="#" style="text-decoration: none; color: #1e3a8a; font-weight: 700; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; background-color: #eff6ff;">
+            <i class="fa-regular fa-calendar"></i> Schedule
+          </a>
+        </li>
+        <li class="nav-item" style="margin-bottom: 15px;">
+          <a href="{% url 'my_patients' %}" style="color: #294f84; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 6px; transition: all 0.2s;">
+              <i class="fa-solid fa-user-injured" style="width: 20px;"></i> My Patients
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="dashboard-content" style="flex: 1; padding: 30px; background-color: #f8fafc; display: flex; flex-direction: column; gap: 20px;">
+      
+      {% if messages %}
+        <div class="alert-messages" style="padding: 15px; border-radius: 8px; background-color: #d1fae5; color: #065f46;">
+          {% for message in messages %}
+            <p style="margin: 0;">{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="schedule-section" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+        <div class="schedule-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+          
+          <h2 style="color: #195190; font-size: 1.3rem; margin: 0;">Patient Schedule</h2>
+          
+          <form method="GET" action="" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="view_mode" style="color: #475569; font-weight: 600;">View:</label>
+              <select name="view_mode" id="view_mode" onchange="this.form.submit()" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
+                <option value="day" {% if view_mode == 'day' %}selected{% endif %}>Day</option>
+                <option value="week" {% if view_mode == 'week' %}selected{% endif %}>Week</option>
+              </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="date" style="color: #475569; font-weight: 600;">Date:</label>
+              <input type="date" id="date" name="date" value="{{ selected_date }}" 
+                    onchange="this.form.submit()"
+                    style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; color: #334155;">
+            </div>
+          </form>
+
+          <div class="search-box" style="position: relative;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></i>
+            <input type="text" id="searchInput" onkeyup="searchAppointment()" placeholder="Search patient..." style="padding: 8px 12px 8px 32px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+          </div>
+        </div>
+
+        <div class="table-container" style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+            <thead>
+              <tr style="background-color: #f1f5f9; color: #334155;">
+                <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1;">Patient Name</th>
+                <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1;">Date & Time</th>
+                <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1;">Reason</th>
+                <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1;">Status</th>
+                <th style="padding: 14px 12px; border-bottom: 2px solid #cbd5e1;">Actions</th> <!-- Cột mới -->
+              </tr>
+            </thead>
+            <tbody>
+              {% for app in appointments %}
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 14px 12px;">
+                    <strong style="color: #0f172a;">{{ app.patient_fullname }}</strong>
+                  </td>
+                  <td style="padding: 14px 12px;">{{ app.appointment_date }} | {{ app.appointment_time }}</td>
+                  <td style="padding: 14px 12px;">{{ app.reason_for_visit }}</td>
+                  <td style="padding: 14px 12px;">{{ app.status }}</td>
+                  <td style="padding: 14px 12px; display: flex; gap: 8px;">
+                    <!-- Nút Tạo Bệnh Án -->
+                    <button onclick="openModal('{{ app.appointment_id }}', '{{ app.patient_id }}', '{{ app.patient_fullname }}')" 
+                            title="Create Treatment"
+                            style="background: #2563eb; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                      <i class="fa-solid fa-plus"></i> Create
+                    </button>
+                    <!-- Nút Xem Lịch Sử -->
+                    <button onclick="viewHistory('{{ app.appointment_id }}', '{{ app.patient_fullname }}')" 
+                            title="View History"
+                            style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer;">
+                      <i class="fa-solid fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="treatmentModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);">
+        <div style="background:white; width:550px; margin:5% auto; padding:0; border-radius:16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow:hidden; border: 1px solid #e2e8f0; animation: modalFadeIn 0.3s ease-out;">
+            
+            <div style="background:#1e3a8a; color:white; padding:20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; font-size:1.25rem; font-weight:700;"><i class="fa-solid fa-file-medical" style="margin-right:10px;"></i>New Medical Record</h3>
+                <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div style="padding:30px;">
+                <p id="modalPatientName" style="font-weight:700; color:#1e40af; font-size:1.1rem; margin-bottom:20px; padding-bottom:10px; border-bottom: 2px dashed #e2e8f0;"></p>
+                
+                <form id="treatmentForm" style="display:flex; flex-direction:column; gap:15px;">
+                    <input type="hidden" id="modal_aid">
+                    <input type="hidden" id="modal_pid">
+                    
+                    <div>
+                        <label style="display:block; font-weight:600; color:#334155; margin-bottom:5px;">Treatment Type</label>
+                        <select id="ttype" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit;">
+                            <option value="Chemotherapy">Chemotherapy</option>
+                            <option value="MRI">MRI</option>
+                            <option value="ECG">ECG</option>
+                            <option value="Physiotherapy">Physiotherapy</option>
+                            <option value="X-Ray">X-Ray</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-weight:600; color:#334155; margin-bottom:5px;">Description</label>
+                        <select id="tdesc" onchange="updatePrice()" required style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; outline:none; font-family:inherit;">
+                            <option value="">-- Choose a service package --</option>
+                            <option value="Basic screening">Basic screening</option>
+                            <option value="Standard procedure">Standard procedure</option>
+                            <option value="Advanced protocol">Advanced protocol</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-weight:600; color:#334155; margin-bottom:5px;">Service Expense ($)</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#64748b; font-weight:bold;">$</span>
+                            <input type="text" id="tcost" readonly style="width:100%; padding:10px 10px 10px 30px; border:1px solid #e2e8f0; background:#f8fafc; border-radius:8px; font-weight:700; color:#0f172a; font-size:1.1rem; cursor:not-allowed;">
+                        </div>
+                        <small style="color:#64748b;">* Prices are automatically updated according to the service package.</small>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:20px;">
+                        <button type="button" onclick="submitTreatment()" style="flex:2; background:#2563eb; color:white; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer; transition:0.2s;">
+                            Confirmation & Invoice
+                        </button>
+                        <button type="button" onclick="closeModal()" style="flex:1; background:#f1f5f9; color:#475569; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; transition:0.2s;">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      </div>
+
+      <style>
+      @keyframes modalFadeIn {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+      }
+      </style>
+
+      <!-- Modal View History -->
+      <div id="historyModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter: blur(3px);">
+          <div style="background:white; width:700px; margin:5% auto; padding:0; border-radius:12px; overflow:hidden;">
+              <div style="background:#10b981; color:white; padding:15px 20px; display:flex; justify-content:space-between;">
+                  <h3 id="historyTitle" style="margin:0;">Treatment History</h3>
+                  <button onclick="closeHistoryModal()" style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">&times;</button>
+              </div>
+              <div style="padding:20px; max-height:400px; overflow-y:auto;">
+                  <table style="width:100%; border-collapse: collapse;">
+                      <thead>
+                          <tr style="text-align:left; border-bottom:2px solid #eee;">
+                              <th style="padding:10px;">Date</th>
+                              <th style="padding:10px;">Type</th>
+                              <th style="padding:10px;">Description</th>
+                              <th style="padding:10px;">Cost</th>
+                          </tr>
+                      </thead>
+                      <tbody id="historyBody">
+                          <!-- Dữ liệu sẽ đổ vào đây bằng JS -->
+                      </tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+  function searchAppointment() {
+    var input, filter, table, tr, tdName, i;
+    input = document.getElementById("searchInput");
+    filter = input.value.toLowerCase();
+    table = document.querySelector("table");
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) {
+      tdName = tr[i].getElementsByTagName("td")[0];
+      
+      if (tdName) {
+        var nameValue = tdName.textContent || tdName.innerText;
+        if (nameValue.toLowerCase().indexOf(filter) > -1) {
+          tr[i].style.display = "";
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
+  }
+
+  // Pop-up tạo bệnh án 
+  const priceMap = {
+    "Basic screening": 2500.00,
+    "Standard procedure": 3200.00,
+    "Advanced protocol": 4500.00
+  };
+
+  function openModal(aid, pid, name) {
+    console.log("Mở modal cho bệnh nhân:", pid);
+
+      document.getElementById('modal_aid').value = aid;
+      document.getElementById('modal_pid').value = pid;
+      document.getElementById('modalPatientName').innerHTML = `<i class="fa-solid fa-user"></i> Patient: ${name}`;
+      
+      // Reset form
+      document.getElementById('treatmentForm').reset();
+      document.getElementById('tcost').value = "0.00";
+      
+      document.getElementById('treatmentModal').style.display = 'block';
+  }
+
+  function updatePrice() {
+      const desc = document.getElementById('tdesc').value;
+      const costField = document.getElementById('tcost');
+      
+      if (priceMap[desc]) {
+          costField.value = priceMap[desc].toFixed(2);
+      } else {
+          costField.value = "0.00";
+      }
+  }
+
+  function closeModal() {
+      document.getElementById('treatmentModal').style.display = 'none';
+  }
+
+  function submitTreatment() {
+    const cost = document.getElementById('tcost').value;
+    if (cost === "0.00" || !cost) {
+        Swal.fire('Lỗi', 'Vui lòng chọn gói dịch vụ!', 'error');
+        return;
+    }
+
+    // --- BƯỚC MỚI: ẨN BẢNG TẠO BỆNH ÁN NGAY LẬP TỨC ---
+    closeModal(); 
+
+    const data = {
+        appointment_id: document.getElementById('modal_aid').value,
+        patient_id: document.getElementById('modal_pid').value,
+        treatment_type: document.getElementById('ttype').value,
+        description: document.getElementById('tdesc').value,
+        cost: cost
+    };
+
+    // Hiển thị trạng thái đang xử lý (Loading) sau khi bảng đã ẩn
+    Swal.fire({
+        title: 'Processing...',
+        text: 'Saving medical record and generating invoice...',
+        allowOutsideClick: false,
+        showConfirmButton: false, // Ẩn nút OK để trông chuyên nghiệp hơn
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    fetch('/create-treatment/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 'success') {
+            // Hiện thông báo thành công sau khi Loading xong
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: res.message,
+                showConfirmButton: false,
+                timer: 2000 
+            }).then(() => {
+                location.reload(); 
+            });
+        } else {
+            // Nếu lỗi, hiện lại thông báo lỗi và bạn có thể chọn mở lại Modal nếu muốn
+            Swal.fire('Error', res.message, 'error');
+        }
+    })
+    .catch(err => {
+        Swal.fire('Connection Error', 'Could not reach server', 'error');
+    });
+}
+
+// Xem bệnh án 
+function viewHistory(aid, name) { // aid bây giờ là appointment_id
+    document.getElementById('historyTitle').innerText = "Treatments for Appointment: " + aid;
+    const body = document.getElementById('historyBody');
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Checking...</td></tr>';
+    document.getElementById('historyModal').style.display = 'block';
+
+    // Gọi API với aid (mã cuộc hẹn)
+    fetch(`/get-history/${aid}/`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (data.history.length === 0) {
+                    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color: #64748b;">No treatments for this appointment.</td></tr>';
+                    return;
+                }
+                body.innerHTML = data.history.map(h => `
+                    <tr style="border-bottom:1px solid #eee;">
+                        <td style="padding:12px;">${h.treatment_date}</td>
+                        <td style="padding:12px;"><span style="background:#ecfdf5; color:#065f46; padding:2px 6px; border-radius:4px; font-size:0.85rem;">${h.treatment_type}</span></td>
+                        <td style="padding:12px;">${h.description}</td>
+                        <td style="padding:12px; font-weight:bold; color:#1e40af;">$${parseFloat(h.cost).toFixed(2)}</td>
+                    </tr>
+                `).join('');
+            }
+        })
+        .catch(err => {
+            body.innerHTML = '<tr><td colspan="4" style="text-align:center; color:red;">Error loading data.</td></tr>';
+        });
+}
+
+function closeHistoryModal() {
+    document.getElementById('historyModal').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HT Hospital - Đăng ký</title>
+  {% load static %}
+  
+  <link rel="stylesheet" href="{% static 'api/css/sign_up.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Paytone+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">HT HOSPITAL</div>
+    <div class="nav-right">
+      <a href="{% url 'sign_in' %}" class="nav-link">Sign in</a>
+    </div>
+  </header>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h2 class="auth-title">Sign Up</h2>
+      
+      <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}
+            <span class="error-text">{{ error }}</span>
+          {% endfor %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="submit-btn">Đăng ký</button>
+      </form>
+
+      <p class="footer-text">
+        Đã có tài khoản? <a href="{% url 'sign_in' %}" >Đăng nhập ngay</a>
+      </p>
+    </div>
+  </div>
+
+  {% if success %}
+  <div id="success-modal" class="modal-overlay">
+    <div class="modal-box">
+      <i class="fa-solid fa-circle-check" ></i>
+      <h3>Đăng ký thành công!</h3>
+      <p>Chúc mừng bạn đã tạo tài khoản thành công tại hệ thống HT Hospital.</p>
+      <button onclick="redirectToSignIn()" class="modal-btn">Đăng nhập ngay</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <script>
+    function redirectToSignIn() {
+      window.location.href = "{% url 'sign_in' %}";
+    }
+  </script>
+</body>
+</html>

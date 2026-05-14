@@ -1,0 +1,323 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+body {
+  background: #f1f5f9;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.dashboard-header {
+  height: 70px;
+  background: #0d2033;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  background: #10b981;
+  color: white;
+  font-weight: 800;
+  font-size: 1.2rem;
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.welcome-doctor {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.welcome-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff33;
+}
+
+/* Layout chính */
+.main-container {
+  display: flex;
+  margin-top: 70px;
+  min-height: calc(100vh - 70px);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: #0d2033;
+  padding: 30px 16px;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item {
+  border-radius: 8px;
+}
+
+.nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover a, .nav-item.active a {
+  background: #c2c8cf;
+  color: #ffffff;
+}
+
+.nav-item.active a {
+  background: #b3bdd7;
+  color: #ffffff;
+}
+
+.nav-item i {
+  font-size: 1.1rem;
+}
+
+/* Khung nội dung chính */
+.dashboard-content {
+  flex: 1;
+  padding: 40px;
+  background: linear-gradient(135deg, rgba(224, 242, 254, 0.4) 0%, rgba(220, 252, 231, 0.3) 100%);
+  overflow-y: auto;
+}
+
+.alert-messages {
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  background-color: #d1fae5;
+  color: #065f46;
+  font-size: 0.9rem;
+}
+
+.schedule-section {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  margin-bottom: 30px;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.schedule-header h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: white;
+}
+
+.search-box i {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: #334155;
+  width: 140px;
+}
+
+/* Bảng dữ liệu */
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 14px 16px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+td {
+  padding: 18px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9rem;
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.patient-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-details strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.appointment-type {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-badge.general-consult {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-badge.consultation-complete {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.consultation-complete-green {
+  background: #dcfce7;
+  color: #059669;
+}
+
+/* Khối hồ sơ bệnh án */
+.records-section h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.record-card {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.record-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.record-header i {
+  color: #64748b;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.record-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.record-text {
+  font-size: 0.85rem;
+  color: #334155;
+  line-height: 1.4;
+}

@@ -1,0 +1,27 @@
+# Database Connection & ORM
+sqlalchemy
+mysql-connector-python
+
+# Data Analysis & Excel Processing
+pandas
+openpyxl
+
+# Optional: For better data visualization in Terminal (if used)
+tabulate
+
+# Django 
+asgiref
+Django
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+PyJWT
+pytz
+sqlparse
+psycopg2-binary
+python-dotenv
+django-allauth
+PyJWT
+asgiref
+sqlparse
+tzdata

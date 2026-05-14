@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patient Details - HT Hospital</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0;">
+
+    <div style="display: flex; min-height: 100vh;">
+        
+        <!-- Sidebar -->
+        <div style="width: 260px; background-color: #195190; color: white; padding: 24px 20px;">
+            <h2 style="font-size: 1.4rem; margin-bottom: 30px; font-weight: 600;">HT Hospital</h2>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 16px;">
+                    <a href="{% url 'doctor_dashboard' %}" style="color: #cbd5e1; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px;">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li style="margin-bottom: 16px;">
+                    <a href="{% url 'my_patients' %}" style="color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.1); font-weight: 600;">
+                        <i class="fa-solid fa-user-injured"></i> My Patients
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div style="flex-grow: 1; padding: 40px;">
+            <div style="max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+                
+                <!-- Back Button & Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <a href="{% url 'my_patients' %}" style="color: #64748b; text-decoration: none; font-size: 0.9rem; padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc;">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </a>
+                        <h2 style="color: #195190; font-size: 1.5rem; margin: 0;">Patient Record: {{ patient.full_name }}</h2>
+                    </div>
+                </div>
+                
+                <!-- Info Grid -->
+                <div style="background: #f8fafc; padding: 20px 24px; border-radius: 8px; margin-bottom: 35px; border: 1px solid #e2e8f0;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 0.95rem; color: #334155;">
+                        <div><strong>Patient ID:</strong> <span style="color: #0f172a; font-weight: 500;">{{ patient.patient_id }}</span></div>
+                        <div><strong>Full Name:</strong> <span style="color: #0f172a; font-weight: 500;">{{ patient.full_name }}</span></div>
+                        <div><strong>Gender:</strong> 
+                            <span style="color: #0f172a; font-weight: 500;">
+                                {% if patient.gender|lower == 'm' %}Male
+                                {% elif patient.gender|lower == 'f' %}Female
+                                {% else %}{{ patient.gender }}{% endif %}
+                            </span>
+                        </div>
+                        <div><strong>Date of Birth:</strong> <span style="color: #0f172a; font-weight: 500;">{{ patient.date_of_birth|date:"Y-m-d" }}</span></div>
+                        <div><strong>Phone Number:</strong> <span style="color: #0f172a; font-weight: 500;">{{ patient.contact_number }}</span></div>
+                        <div><strong>Address:</strong> <span style="color: #0f172a; font-weight: 500;">{{ patient.address }}</span></div>
+                    </div>
+                </div>
+
+                <!-- Past Appointments -->
+                <div style="margin-bottom: 40px;">
+                    <h3 style="color: #0f172a; font-size: 1.2rem; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: #0284c7; margin-right: 8px;"></i> Medical History (Past)
+                    </h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9; color: #334155;">
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Appointment ID</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Exam Date</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Time</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Reason for Visit</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Treatment Type</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Details/Description</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in past_appointments %}
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td style="padding: 12px 16px; color: #0f172a; font-weight: 500;">{{ app.appointment_id }}</td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.appointment_date|date:"Y-m-d" }}</td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.appointment_time }}</td>
+                                        <td style="padding: 12px 16px; color: #0f172a; font-weight: 500;">
+                                            {{ app.treatment_type|default:app.reason_for_visit }}
+                                        </td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.reason_for_visit|default:"General consultation" }}</td>
+                                        <td style="padding: 12px 16px; color: #475569; font-size: 0.9rem;">
+                                            {{ app.description|default:"N/A" }}
+                                        </td>
+                                        <td style="padding: 12px 16px;">
+                                            <span style="background-color: #f1f5f9; color: #334155; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                                                {{ app.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="7" style="padding: 30px; text-align: center; color: #64748b;">No medical history found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Upcoming Appointments -->
+                <div>
+                    <h3 style="color: #0f172a; font-size: 1.2rem; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                        <i class="fa-solid fa-calendar-check" style="color: #16a34a; margin-right: 8px;"></i> Current / Upcoming Appointments
+                    </h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9; color: #334155;">
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Appointment ID</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Date</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Time</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Reason</th>
+                                    <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in upcoming_appointments %}
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <td style="padding: 12px 16px; color: #0f172a; font-weight: 500;">{{ app.appointment_id }}</td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.appointment_date|date:"Y-m-d" }}</td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.appointment_time }}</td>
+                                        <td style="padding: 12px 16px; color: #475569;">{{ app.reason_for_visit|default:"General consultation" }}</td>
+                                        <td style="padding: 12px 16px;">
+                                            <span style="background-color: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                                                {{ app.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="5" style="padding: 30px; text-align: center; color: #64748b;">No upcoming appointments.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

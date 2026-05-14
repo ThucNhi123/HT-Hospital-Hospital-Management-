@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HT Hospital</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'api/css/landing_page.css' %}">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=DynaPuff:wght@400..700&family=Maven+Pro:wght@400..900&family=Modak&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Paytone+One&family=Rubik+Bubbles&family=Sigmar+One&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="logo">HT HOSPITAL</div>
+    <div class="nav-right">
+      <a href="{% url 'sign_in' %}" class="sign-in">Sign in</a>
+      <a href="{% url 'sign_up' %}" class="sign-up">Sign up</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Welcome</h1>
+      <p>Providing comprehensive healthcare, bringing peace of mind to every family.</p>
+    </div>
+    <div class="hero-image">
+      <img src="{% static 'images/landing_page.png' %}" alt="Hospital Building">
+    </div>
+  </section>
+</body>
+</html>
